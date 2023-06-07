@@ -130,31 +130,33 @@ def venues():
   #   }]
   # }]
   venues = Venue.query.all()
-  data = []
-  for venue in venues:
-    current_time = datetime.now()
-    upcoming_shows = [show for show in venue.shows if show.start_time > current_time]
+  output = []
+  current_time = datetime.now()
+  for v in venues:
+    
+    upcoming = [show for show in v.shows if show.start_time > current_time]
     flagNew = True
-    for i in range(0, len(data)):
-      if venue.city == data[i]['city'] and venue.state == data[i]['state']:
-        data[i]['venues'].append({
-          "id": venue.id,
-          "name": venue.name,
-          "num_upcoming_shows": len(upcoming_shows)
-        })
-        flagNew = False
+    for i in range(0, len(output)):
+      if v.city == output[i]['city']:
+        if v.state == output[i]['state']:
+          output[i]['venues'].append({
+            "id": v.id,
+            "name": v.name,
+            "num_upcoming_shows": len(upcoming)
+          })
+          flagNew = False
     if flagNew:
-      data.append({
-        "city": venue.city,
-        "state": venue.state,
+      output.append({
+        "city": v.city,
+        "state": v.state,
         "venues": [{
-          "id": venue.id,
-          "name": venue.name,
-          "num_upcoming_shows": len(upcoming_shows)
+          "id": v.id,
+          "name": v.name,
+          "num_upcoming_shows": len(upcoming)
         }]
       })
       
-  return render_template('pages/venues.html', areas=data);
+  return render_template('pages/venues.html', areas=output);
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
@@ -195,26 +197,25 @@ def show_venue(venue_id):
             "artist_image_link": show.artist.image_link,
             "start_time": format_datetime(str(show.start_time))
           } for show in v.shows if show.start_time > current_date]
-
+  data = {}
   if v:
-    data={
-    "id": venue_id,
-    "name": v.name,
-    "genres": v.genres.split(","),
-    "address": v.address,
-    "city": v.city,
-    "state": v.state,
-    "phone": v.phone,
-    "website_link": v.website_link,
-    "facebook_link": v.facebook_link,
-    "seeking_talent": v.seeking_talent,
-    "seeking_description": v.seeking_description,
-    "image_link": v.image_link,
-    "past_shows": past,
-    "upcoming_shows": upcoming,
-    "past_shows_count": len(past),
-    "upcoming_shows_count": len(upcoming)
-  }
+    data["id"] = venue_id
+    data["name"] = v.name
+    data["genres"] = v.genres.split(",")
+    data["address"] = v.address
+    data["city"] = v.city
+    data["state"] = v.state
+    data["phone"] = v.phone
+    data["website_link"] = v.website_link
+    data["facebook_link"] = v.facebook_link
+    data["seeking_talent"] = v.seeking_talent
+    data["seeking_description"] = v.seeking_description
+    data["image_link"] = v.image_link
+    data["past_shows"] = past
+    data["upcoming_shows"] = upcoming
+    data["past_shows_count"] = len(past)
+    data["upcoming_shows_count"] = len(upcoming)
+  
   # data1={
   #   "id": 1,
   #   "name": "The Musical Hop",
